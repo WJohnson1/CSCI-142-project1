@@ -143,8 +143,128 @@ public class Machine {
             return "STORE " + this.name;
         }
     }
+    public static class PushConst implements Instruction{
+        private int constant;
+        public PushConst(int constant){
+            this.constant = constant;
+        }
+        @Override
+        public void execute() {
+            stack.push(getConstant());
+        }
 
-    //
-    // ENTER YOUR CODE FOR THE OTHER INSTRUCTION CLASSES HERE.
-    //
+        @Override
+        public String toString() {
+            return "PUSH " + getConstant();
+        }
+
+        public int getConstant() {
+            return constant;
+        }
+    }
+    public static class Negate implements Instruction{
+
+        @Override
+        public void execute() {
+            int op1 = stack.pop();
+            op1 = op1 * -1;
+            stack.push( op1 );
+        }
+
+        @Override
+        public String toString() {
+            return "NEG";
+        }
+    }
+    public static class Print implements Instruction{
+
+        public Print(){
+
+        }
+        @Override
+        public void execute() {
+            int op2 = stack.pop();
+            System.out.println("*** " + op2);
+        }
+
+        @Override
+        public String toString() {
+            return "PRINT";
+        }
+    }
+    public static class SquareRoot implements Instruction{
+
+        @Override
+        public void execute() {
+            double op1 = stack.pop();
+            stack.push((int) Math.pow(op1,0.5));
+        }
+
+        @Override
+        public String toString() {
+            return "SQRT";
+        }
+    }
+    public static class Multiply implements Instruction{
+
+        @Override
+        public void execute() {
+            int op2 = stack.pop();
+            int op1 = stack.pop();
+            stack.push( op1 * op2 );
+        }
+
+        @Override
+        public String toString() {
+            return "MUL";
+        }
+    }
+    public static class Load implements Instruction{
+        private String varname;
+        public Load(String load){
+            this.varname = load;
+        }
+        @Override
+        public void execute() {
+            int i = table.get(getVarname());
+            stack.push(i);
+        }
+
+        @Override
+        public String toString() {
+            return "LOAD " + getVarname();
+        }
+
+        public String getVarname() {
+            return varname;
+        }
+    }
+    public static class Subtract implements Instruction{
+
+        @Override
+        public void execute() {
+            int op2 = stack.pop();
+            int op1 = stack.pop();
+            stack.push( op1 - op2 );
+        }
+
+        @Override
+        public String toString() {
+            return "SUB";
+        }
+    }
+    public static class Divide implements Instruction{
+
+        @Override
+        public void execute() {
+            int op2 = stack.pop();
+            int op1 = stack.pop();
+            stack.push( op1 / op2 );
+        }
+
+        @Override
+        public String toString() {
+            return "DIV";
+        }
+    }
 }
