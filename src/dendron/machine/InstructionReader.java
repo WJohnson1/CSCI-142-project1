@@ -45,6 +45,8 @@ public class InstructionReader {
             Scanner in = new Scanner( fileStr );
             while ( in.hasNext() ) {
                 String mnemonic = in.next();
+                System.out.println(mnemonic);
+                System.out.println(gen.keySet());
                 if ( gen.containsKey( mnemonic ) ) {
                     result.add( gen.get( mnemonic ).apply( in ) );
                 }
@@ -71,6 +73,7 @@ public class InstructionReader {
             System.exit( 1 );
         }
         List< Machine.Instruction > code = assemble( args[ 0 ] );
+        System.out.println(code);
         Machine.execute( code );
     }
 }

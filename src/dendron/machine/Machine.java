@@ -61,8 +61,8 @@ public class Machine {
      *
      * @param program the list of instructions in the program
      */
-    public static void displayInstructions(
-            List< Machine.Instruction > program ) {
+
+    public static void displayInstructions(List< Machine.Instruction > program ) {
         System.out.println( "\nCompiled code:" );
         for ( Machine.Instruction instr: program ) {
             System.out.println( instr );
@@ -77,10 +77,12 @@ public class Machine {
      * and the contents of the symbol table.
      * @param program a list of Machine instructions
      */
+
     public static void execute( List< Instruction > program ) {
         reset();
         System.out.println("Executing compiled code...");
         for ( Instruction instr: program ) {
+            System.out.println(instr.toString());
             instr.execute();
         }
         System.out.println( "Machine: execution ended with " +
@@ -143,6 +145,7 @@ public class Machine {
             return "STORE " + this.name;
         }
     }
+
     public static class PushConst implements Instruction{
         private int constant;
         public PushConst(int constant){
@@ -179,8 +182,9 @@ public class Machine {
     public static class Print implements Instruction{
 
         public Print(){
-
+            System.out.println(this);
         }
+
         @Override
         public void execute() {
             int op2 = stack.pop();
@@ -224,6 +228,7 @@ public class Machine {
         public Load(String load){
             this.varname = load;
         }
+
         @Override
         public void execute() {
             int i = table.get(getVarname());
@@ -236,7 +241,7 @@ public class Machine {
         }
 
         public String getVarname() {
-            return varname;
+            return this.varname;
         }
     }
     public static class Subtract implements Instruction{
