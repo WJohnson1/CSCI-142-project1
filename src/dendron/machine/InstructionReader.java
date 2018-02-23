@@ -19,11 +19,11 @@ public class InstructionReader {
             = new HashMap< String, Function< Scanner, Machine.Instruction > >()
     {{
         put( "PUSH", in -> { int i = in.nextInt();
-                             return new Machine.PushConst( i ); } );
+            return new Machine.PushConst( i ); } );
         put( "LOAD", in -> { String v = in.next();
-                             return new Machine.Load( v ); } );
+            return new Machine.Load( v ); } );
         put( "STORE", in -> { String v = in.next();
-                              return new Machine.Store( v ); } );
+            return new Machine.Store( v ); } );
         put( "ADD", in -> new Machine.Add() );
         put( "SUB", in -> new Machine.Subtract() );
         put( "MUL", in -> new Machine.Multiply() );
@@ -45,8 +45,6 @@ public class InstructionReader {
             Scanner in = new Scanner( fileStr );
             while ( in.hasNext() ) {
                 String mnemonic = in.next();
-                System.out.println(mnemonic);
-                System.out.println(gen.keySet());
                 if ( gen.containsKey( mnemonic ) ) {
                     result.add( gen.get( mnemonic ).apply( in ) );
                 }
@@ -73,7 +71,6 @@ public class InstructionReader {
             System.exit( 1 );
         }
         List< Machine.Instruction > code = assemble( args[ 0 ] );
-        System.out.println(code);
         Machine.execute( code );
     }
 }
