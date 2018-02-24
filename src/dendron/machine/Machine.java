@@ -16,14 +16,12 @@ import dendron.Errors;
  * of nested class instantiation or to pass the symbol table and
  * stack into every instruction when it executes.)
  *
- * THIS CLASS IS INCOMPLETE. The student must add code to it.
  *
  * @author James Heliotis
- * @author YOUR NAME HERE
+ * @author William Johnson
  */
 public class Machine {
 
-    /** Do not instatiate this class. */
     private Machine() {}
 
     public static interface Instruction {
@@ -145,28 +143,52 @@ public class Machine {
             return "STORE " + this.name;
         }
     }
-
+    /**
+     * The PUSH instruction
+     */
     public static class PushConst implements Instruction{
+        /** stores constant of target variable */
         private int constant;
+        /**
+         * Create a PUSH instruction
+         * @param constant the constant of the target variable
+         */
         public PushConst(int constant){
             this.constant = constant;
         }
         @Override
+        /**
+         * Run the microsteps for the PUSH instruction.
+         */
         public void execute() {
             stack.push(getConstant());
         }
 
+        /**
+         * Show the PUSH instruction as plain text.
+         * @return "PUSH" followed by the target variable constant
+         */
         @Override
         public String toString() {
             return "PUSH " + getConstant();
         }
 
+        /**
+         * Show the constant of the variable
+         * @return the target variable constant
+         */
         public int getConstant() {
             return constant;
         }
     }
-    public static class Negate implements Instruction{
 
+    /**
+     * The NEGATE instruction
+     */
+    public static class Negate implements Instruction{
+        /**
+         * Run the microsteps for the NEGATE instruction.
+         */
         @Override
         public void execute() {
             int op1 = stack.pop();
@@ -174,43 +196,75 @@ public class Machine {
             stack.push( op1 );
         }
 
+        /**
+         * Show the NEGATE instruction as plain text.
+         * @return "NEG"
+         */
         @Override
         public String toString() {
             return "NEG";
         }
     }
-    public static class Print implements Instruction{
 
+    /**
+     * The PRINT instruction
+     */
+    public static class Print implements Instruction{
+        /**
+         * Create a PRINT instruction
+         */
         public Print(){
             System.out.println(this);
         }
-
+        /**
+         * Run the microsteps for the PRINT instruction.
+         */
         @Override
         public void execute() {
             int op2 = stack.pop();
             System.out.println("*** " + op2);
         }
 
+        /**
+         * Show the PRINT instruction as plain text.
+         * @return "PRINT"
+         */
         @Override
         public String toString() {
             return "PRINT";
         }
     }
-    public static class SquareRoot implements Instruction{
 
+    /**
+     * The SQUAREROOT instruction
+     */
+    public static class SquareRoot implements Instruction{
+        /**
+         * Run the microsteps for the SQUAREROOT instruction.
+         */
         @Override
         public void execute() {
             double op1 = stack.pop();
             stack.push((int) Math.pow(op1,0.5));
         }
 
+        /**
+         * Show the SQRT instruction as plain text.
+         * @return "SQRT"
+         */
         @Override
         public String toString() {
             return "SQRT";
         }
     }
-    public static class Multiply implements Instruction{
 
+    /**
+     * The MULTIPLY instruction
+     */
+    public static class Multiply implements Instruction{
+        /**
+         * Run the microsteps for the MULTIPLY instruction.
+         */
         @Override
         public void execute() {
             int op2 = stack.pop();
@@ -218,34 +272,63 @@ public class Machine {
             stack.push( op1 * op2 );
         }
 
+        /**
+         * Show the MULTIPLY instruction as plain text.
+         * @return "MUL"
+         */
         @Override
         public String toString() {
             return "MUL";
         }
     }
+
+    /**
+     * The LOAD instruction
+     */
     public static class Load implements Instruction{
+        /** stores varname of target variable */
         private String varname;
+        /**
+         * Create a LOAD instruction
+         * @param load the name of the target variable
+         */
         public Load(String load){
             this.varname = load;
         }
-
+        /**
+         * Run the microsteps for the LOAD instruction.
+         */
         @Override
         public void execute() {
             int i = table.get(getVarname());
             stack.push(i);
         }
 
+        /**
+         * Show the LOAD instruction as plain text.
+         * @return "LOAD" followed by the target variable varname
+         */
         @Override
         public String toString() {
             return "LOAD " + getVarname();
         }
 
+        /**
+         * Show the varname of the variable
+         * @return the target variable varname
+         */
         public String getVarname() {
             return this.varname;
         }
     }
-    public static class Subtract implements Instruction{
 
+    /**
+     * The SUBTRACT instruction
+     */
+    public static class Subtract implements Instruction{
+        /**
+         * Run the microsteps for the SUBTRACT instruction.
+         */
         @Override
         public void execute() {
             int op2 = stack.pop();
@@ -253,13 +336,23 @@ public class Machine {
             stack.push( op1 - op2 );
         }
 
+        /**
+         * Show the NEGATE instruction as plain text.
+         * @return "NEG"
+         */
         @Override
         public String toString() {
             return "SUB";
         }
     }
-    public static class Divide implements Instruction{
 
+    /**
+     * The DIVIDE instruction
+     */
+    public static class Divide implements Instruction{
+        /**
+         * Run the microsteps for the DIVIDE instruction.
+         */
         @Override
         public void execute() {
             int op2 = stack.pop();
@@ -267,6 +360,10 @@ public class Machine {
             stack.push( op1 / op2 );
         }
 
+        /**
+         * Show the DIVIDE instruction as plain text.
+         * @return "DIV"
+         */
         @Override
         public String toString() {
             return "DIV";
