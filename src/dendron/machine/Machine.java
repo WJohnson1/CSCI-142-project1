@@ -23,7 +23,6 @@ import dendron.Errors;
 public class Machine {
 
     private Machine() {}
-
     public static interface Instruction {
         /**
          * Run this instruction on the Machine, using the Machine's
@@ -51,6 +50,8 @@ public class Machine {
         stack = new Stack<>();
         table = new HashMap<>();
     }
+
+
 
     /**
      * Generate a listing of a program on standard output by
@@ -142,6 +143,10 @@ public class Machine {
         public String toString() {
             return "STORE " + this.name;
         }
+
+        public String getName() {
+            return name;
+        }
     }
     /**
      * The PUSH instruction
@@ -161,6 +166,7 @@ public class Machine {
          * Run the microsteps for the PUSH instruction.
          */
         public void execute() {
+
             stack.push(getConstant());
         }
 
@@ -214,7 +220,7 @@ public class Machine {
          * Create a PRINT instruction
          */
         public Print(){
-            System.out.println(this);
+
         }
         /**
          * Run the microsteps for the PRINT instruction.
