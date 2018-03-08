@@ -17,7 +17,7 @@ public class ParseTree implements ExpressionNode, ActionNode {
     private List<Machine.Instruction> instructions;
     private Map<String, Integer> symTab;
     private List<String> program;
-    private Stack<Integer> stack;
+
     /**
      * Parse the entire list of program tokens. The program is a
      * sequence of actions (statements), each of which modifies something
@@ -28,14 +28,16 @@ public class ParseTree implements ExpressionNode, ActionNode {
     public ParseTree( List< String > program ) {
         this.instructions = new ArrayList<>();
         this.symTab = new HashMap<>();
-
-        this.stack = new Stack<>();
-        for (String expression: program){
-            List<String> expressionList = Arrays.asList(expression.split(" "));
-            this.program = expressionList;
-            parseExpr(expressionList);
+        int start = 0;
+        int end = program.size();
+        for (int i = 1; i<program.size();i++){
+            if (program.get(i).equals(":=") || program.get(i).equals("@")){
+                parseExpr(program.subList(start,i));
+                start = i;
+            }
         }
-
+        parseExpr(program.subList(start,end));
+        this.program = program;
     }
     public static boolean isInteger(String str) {
         if (str == null) {
@@ -69,8 +71,8 @@ public class ParseTree implements ExpressionNode, ActionNode {
     private ActionNode parseAction( List< String > program ) {
         if (program.get(0).equals("@")){
             if (isInteger(program.get(1))) {
-                Machine.Instruction p = new Machine.PushConst(Integer.parseInt(program.get(1)));
-                this.instructions.add(p);
+                //Machine.Instruction p = new Machine.PushConst(Integer.parseInt(program.get(1)));
+                //this.instructions.add(p);
             }
             else if(this.symTab.containsKey(program.get(1))){
                 Machine.Load l = new Machine.Load(program.get(1));
@@ -78,13 +80,12 @@ public class ParseTree implements ExpressionNode, ActionNode {
             }
             Machine.Instruction pr = new Machine.Print();
             this.instructions.add(pr);
-            System.out.println("*** " + program.get(1));
         }
         else if(program.get(0).equals("_")){
             int num2 = 0;
             if (isInteger(program.get(1))) {
-                Machine.PushConst p = new Machine.PushConst(Integer.parseInt(program.get(1)));
-                this.instructions.add(p);
+                //Machine.PushConst p = new Machine.PushConst(Integer.parseInt(program.get(1)));
+                //this.instructions.add(p);
                 Machine.Negate n = new Machine.Negate();
                 this.instructions.add(n);
                 num2 = -1 * Integer.parseInt(program.get(1));
@@ -95,6 +96,8 @@ public class ParseTree implements ExpressionNode, ActionNode {
                 Machine.Negate n = new Machine.Negate();
                 this.instructions.add(n);
                 num2 = -1 * this.symTab.get(program.get(1));
+                this.symTab.put(program.get(1),this.symTab.get(program.get(1))*-1);
+
             }
             ArrayList<String> program1 = new ArrayList<>(program);
             program1.add(0,String.valueOf(num2));
@@ -108,13 +111,14 @@ public class ParseTree implements ExpressionNode, ActionNode {
             int count = 0;
             int num = 0;
             int num1 = 0;
+            boolean a =true;
             for (int i = 1; i<program.size();i++){
-                if (isInteger(program.get(i)) && count < 1) {
-                    Machine.PushConst p = new Machine.PushConst(Integer.parseInt(program.get(i)));
+                if (isInteger(program.get(i)) && count < 1 && !this.symTab.containsValue(program.get(i))) {
+                    //Machine.PushConst p = new Machine.PushConst(Integer.parseInt(program.get(i)));
                     num = Integer.parseInt(program.get(i));
-                    this.instructions.add(p);
+                    //this.instructions.add(p);
                     if (program.get(i-1).equals("_")){
-                        List<String> p1 = program.subList(0,count-1);
+                        List<String> p1 = program.subList(0,i-1);
                         ArrayList<String> p2 = new ArrayList<>(p1);
                         parseExpr(program.subList(i-1,program.size()));
                         p2.addAll(p2.size(),this.program);
@@ -124,12 +128,14 @@ public class ParseTree implements ExpressionNode, ActionNode {
                     }
                     count++;
                 }
-                else if (isInteger(program.get(i)) && count < 2) {
-                    Machine.PushConst p = new Machine.PushConst(Integer.parseInt(program.get(i)));
+                else if (isInteger(program.get(i)) && count < 2 && !this.symTab.containsValue(program.get(i))) {
                     num1 = Integer.parseInt(program.get(i));
-                    this.instructions.add(p);
+                    if (!a) {
+                        Machine.PushConst p = new Machine.PushConst(Integer.parseInt(program.get(i)));
+                        this.instructions.add(p);
+                    }
                     if (program.get(i-1).equals("_")){
-                        List<String> p1 = program.subList(0,count-1);
+                        List<String> p1 = program.subList(0,i-1);
                         ArrayList<String> p2 = new ArrayList<>(p1);
                         parseExpr(program.subList(i-1,program.size()));
                         p2.addAll(p2.size(),this.program);
@@ -143,7 +149,7 @@ public class ParseTree implements ExpressionNode, ActionNode {
                     Machine.Load l = new Machine.Load(program.get(i));
                     num = this.symTab.get(program.get(i));
                     if (program.get(i-1).equals("_")){
-                        List<String> p1 = program.subList(0,count-1);
+                        List<String> p1 = program.subList(0,i-1);
                         ArrayList<String> p2 = new ArrayList<>(p1);
                         parseExpr(program.subList(i-1,program.size()));
                         p2.addAll(p2.size(),this.program);
@@ -152,6 +158,7 @@ public class ParseTree implements ExpressionNode, ActionNode {
                         num*=-1;
                     }
                     this.instructions.add(l);
+                    a =false;
                     count++;
                 }
                 else if(this.symTab.containsKey(program.get(i))&& count < 2){
@@ -159,7 +166,7 @@ public class ParseTree implements ExpressionNode, ActionNode {
                     num1 = this.symTab.get(program.get(i));
                     this.instructions.add(l);
                     if (program.get(i-1).equals("_")){
-                        List<String> p1 = program.subList(0,count-1);
+                        List<String> p1 = program.subList(0,i-1);
                         ArrayList<String> p2 = new ArrayList<>(p1);
                         parseExpr(program.subList(i-1,program.size()));
                         p2.addAll(p2.size(),this.program);
@@ -185,12 +192,12 @@ public class ParseTree implements ExpressionNode, ActionNode {
             int count = 0;
             int mul = 1;
             for (int i = 0; i<program.size();i++){
-                if (isInteger(program.get(i)) && count<2){
-                    Machine.PushConst p = new Machine.PushConst(Integer.parseInt(program.get(i)));
-                    this.instructions.add(p);
+                if (isInteger(program.get(i)) && count<2 && !this.symTab.containsValue(program.get(i))){
+                    //Machine.PushConst p = new Machine.PushConst(Integer.parseInt(program.get(i)));
+                    //this.instructions.add(p);
                     mul*=Integer.parseInt(program.get(i));
                     if (program.get(i-1).equals("_")){
-                        List<String> p1 = program.subList(0,count-1);
+                        List<String> p1 = program.subList(0,i-1);
                         ArrayList<String> p2 = new ArrayList<>(p1);
                         parseExpr(program.subList(i-1,program.size()));
                         p2.addAll(p2.size(),this.program);
@@ -205,7 +212,7 @@ public class ParseTree implements ExpressionNode, ActionNode {
                     this.instructions.add(l);
                     mul*=this.symTab.get(program.get(i));
                     if (program.get(i-1).equals("_")){
-                        List<String> p1 = program.subList(0,count-1);
+                        List<String> p1 = program.subList(0,i-1);
                         ArrayList<String> p2 = new ArrayList<>(p1);
                         parseExpr(program.subList(i-1,program.size()));
                         p2.addAll(p2.size(),this.program);
@@ -231,12 +238,12 @@ public class ParseTree implements ExpressionNode, ActionNode {
             int num = 0;
             for (int i = 1; i<program.size();i++){
                 if (isInteger(program.get(i)) && count<2){
-                    Machine.PushConst p = new Machine.PushConst(Integer.parseInt(program.get(i)));
-                    this.instructions.add(p);
+                    //Machine.PushConst p = new Machine.PushConst(Integer.parseInt(program.get(i)));
+                    //this.instructions.add(p);
                     int num1 = Integer.parseInt(program.get(i));
                     count++;
                     if (program.get(i-1).equals("_")){
-                        List<String> p1 = program.subList(0,count-1);
+                        List<String> p1 = program.subList(0,i-1);
                         ArrayList<String> p2 = new ArrayList<>(p1);
                         parseExpr(program.subList(i-1,program.size()));
                         p2.addAll(p2.size(),this.program);
@@ -249,10 +256,10 @@ public class ParseTree implements ExpressionNode, ActionNode {
                 else if (this.symTab.containsKey(program.get(i))&& count < 2){
                     Machine.Load l = new Machine.Load(program.get(i));
                     this.instructions.add(l);
-                    int num1 = Integer.parseInt(program.get(i));
+                    int num1 = this.symTab.get(program.get(i));
                     num = num + num1;
                     if (program.get(i-1).equals("_")){
-                        List<String> p1 = program.subList(0,count-1);
+                        List<String> p1 = program.subList(0,i-1);
                         ArrayList<String> p2 = new ArrayList<>(p1);
                         parseExpr(program.subList(i-1,program.size()));
                         p2.addAll(p2.size(),this.program);
@@ -279,12 +286,12 @@ public class ParseTree implements ExpressionNode, ActionNode {
             int num1 = 0;
             for (int i = 1; i < program.size(); i++) {
                 if (isInteger(program.get(i)) && count < 1) {
-                    Machine.PushConst p = new Machine.PushConst(Integer.parseInt(program.get(i)));
+                    //Machine.PushConst p = new Machine.PushConst(Integer.parseInt(program.get(i)));
                     num = Integer.parseInt(program.get(i));
-                    this.instructions.add(p);
+                    //this.instructions.add(p);
                     count++;
                     if (program.get(i-1).equals("_")){
-                        List<String> p1 = program.subList(0,count-1);
+                        List<String> p1 = program.subList(0,i-1);
                         ArrayList<String> p2 = new ArrayList<>(p1);
                         parseExpr(program.subList(i-1,program.size()));
                         p2.addAll(p2.size(),this.program);
@@ -294,12 +301,12 @@ public class ParseTree implements ExpressionNode, ActionNode {
                     }
                 }
                 else if (isInteger(program.get(i)) && count < 2) {
-                    Machine.PushConst p = new Machine.PushConst(Integer.parseInt(program.get(i)));
+                    //Machine.PushConst p = new Machine.PushConst(Integer.parseInt(program.get(i)));
                     num1 = Integer.parseInt(program.get(i));
-                    this.instructions.add(p);
+                    //this.instructions.add(p);
                     count++;
                     if (program.get(i-1).equals("_")){
-                        List<String> p1 = program.subList(0,count-1);
+                        List<String> p1 = program.subList(0,i-1);
                         ArrayList<String> p2 = new ArrayList<>(p1);
                         parseExpr(program.subList(i-1,program.size()));
                         p2.addAll(p2.size(),this.program);
@@ -313,7 +320,7 @@ public class ParseTree implements ExpressionNode, ActionNode {
                     this.instructions.add(l);
                     num = this.symTab.get(program.get(i));
                     if (program.get(i-1).equals("_")){
-                        List<String> p1 = program.subList(0,count-1);
+                        List<String> p1 = program.subList(0,i-1);
                         ArrayList<String> p2 = new ArrayList<>(p1);
                         parseExpr(program.subList(i-1,program.size()));
                         p2.addAll(p2.size(),this.program);
@@ -325,17 +332,21 @@ public class ParseTree implements ExpressionNode, ActionNode {
 
                 }
                 else if (this.symTab.containsKey(program.get(i))&& count < 2){
-                    Machine.Load l = new Machine.Load(program.get(i));
-                    this.instructions.add(l);
+
                     num1 = this.symTab.get(program.get(i));
                     if (program.get(i-1).equals("_")){
-                        List<String> p1 = program.subList(0,count-1);
+                        List<String> p1 = program.subList(0,i-1);
                         ArrayList<String> p2 = new ArrayList<>(p1);
-                        parseExpr(program.subList(i-1,program.size()));
+                        parseAction(program.subList(i-1,program.size()));
+
                         p2.addAll(p2.size(),this.program);
                         program = p2;
                         this.program = p2;
                         num1*= -1;
+                    }
+                    else{
+                        Machine.Load l = new Machine.Load(program.get(i));
+                        this.instructions.add(l);
                     }
                     count++;
                 }
@@ -354,9 +365,9 @@ public class ParseTree implements ExpressionNode, ActionNode {
         else if(program.get(0).equals("#")){
             int num = 0;
             if (isInteger(program.get(1))) {
-                Machine.PushConst p = new Machine.PushConst(Integer.parseInt(program.get(1)));
+                //Machine.PushConst p = new Machine.PushConst(Integer.parseInt(program.get(1)));
                 num = (int) Math.pow(Double.parseDouble(program.get(1)),0.5);
-                this.instructions.add(p);
+                //this.instructions.add(p);
             }
             else if(this.symTab.containsKey(program.get(1))){
                 Machine.Load l = new Machine.Load(program.get(1));
@@ -382,7 +393,7 @@ public class ParseTree implements ExpressionNode, ActionNode {
      * @return a parse tree for this expression
      */
     private ExpressionNode parseExpr( List< String > program ) {
-        int count = 0;
+        int count = 2;
         int count1 = 1;
         boolean a = false;
         if (program.get(0).equals("@") == false){
@@ -391,11 +402,15 @@ public class ParseTree implements ExpressionNode, ActionNode {
             }
             while (program.size() > 3 && count < 100) {
                 if (count >= program.size()) {
-                    count = 0;
+                    count = 2;
                     count1++;
                 }
                 if (isInteger(program.get(count)) || this.symTab.containsKey(program.get(count))) {
                     if (!isInteger(program.get(count - 1)) && !this.symTab.containsKey(program.get(count - 1))) {
+                        if (isInteger(program.get(count)) && !program.get(count-1).equals("#")){
+                            Machine.PushConst p = new Machine.PushConst(Integer.parseInt(program.get(count)));
+                            this.instructions.add(p);
+                        }
                         List<String> p1 = program.subList(0, count - 1);
                         ArrayList<String> p2 = new ArrayList<>(p1);
                         parseAction(program.subList(count - 1, program.size()));
@@ -413,9 +428,16 @@ public class ParseTree implements ExpressionNode, ActionNode {
                 this.instructions.add(p);
             }
 
+
+
             this.symTab.put(program.get(1), Integer.parseInt(program.get(2)));
             Machine.Store s = new Machine.Store(program.get(1));
             this.instructions.add(s);
+            ArrayList<String> p3 = new ArrayList<>(program);
+            p3.remove(0);
+            p3.remove(0);
+            p3.remove(0);
+            this.program = p3;
         }
         else{
             while (program.size() > 2 && count < 100) {
@@ -438,6 +460,10 @@ public class ParseTree implements ExpressionNode, ActionNode {
 
             }
             parseAction(program);
+            ArrayList<String> p3 = new ArrayList<>(program);
+            p3.remove(0);
+            p3.remove(0);
+            this.program = p3;
         }
         return null;
     }
@@ -447,7 +473,7 @@ public class ParseTree implements ExpressionNode, ActionNode {
      * @see dendron.tree.ActionNode#infixDisplay()
      */
     public void displayProgram() {
-
+        this.infixDisplay();
     }
 
     /**
@@ -455,9 +481,14 @@ public class ParseTree implements ExpressionNode, ActionNode {
      * @see dendron.tree.ActionNode#execute(Map)
      */
     public void interpret() {
-        for (int i = 0;i<this.instructions.size();i++){
-            System.out.println(this.instructions.get(i));
+        System.out.println("Interpreting the parse tree...");
+        for (Machine.Instruction a: this.instructions){
+            if (a.toString().equals("PRINT") ){
+                Machine.Print b = (Machine.Print) a;
+                System.out.println("=== "+b.getValue());
+            }
         }
+        System.out.println("Interpretation complete");
     }
 
     /**
@@ -467,9 +498,7 @@ public class ParseTree implements ExpressionNode, ActionNode {
      * @see Machine.Instruction#execute()
      */
     public List< Machine.Instruction > compile() {
-        List<Machine.Instruction> l = new ArrayList<>();
-
-        return null;
+        return this.instructions;
     }
 
     /**
@@ -478,7 +507,7 @@ public class ParseTree implements ExpressionNode, ActionNode {
      */
     @Override
     public void execute(Map<String, Integer> symTab) {
-
+        System.out.println("truth");
     }
 
     /**
@@ -496,7 +525,29 @@ public class ParseTree implements ExpressionNode, ActionNode {
      */
     @Override
     public void infixDisplay() {
-        System.out.println(this.symTab);
+        int start = 0;
+        int end = program.size();
+        for (int i = 1; i<program.size();i++){
+            if (program.get(i).equals(":=") || program.get(i).equals("@")) {
+                List<String> e = program.subList(start, i);
+                ArrayList<String> equation = new ArrayList<>(e);
+                if (equation.get(0).equals(":=")){
+                    System.out.print(equation.get(1)+ " ");
+                    System.out.print(equation.get(0)+ " (");
+                    for (int j = 2;j<equation.size();j++){
+                        System.out.print(equation.get(j));
+                        if (!equation.get(j).equals("_")){
+                            System.out.print(" ");
+                        }
+                    }
+                }
+                else{
+                    System.out.println("PRINT "+equation.get(i);
+                }
+                start = i;
+            }
+        }
+        System.out.println(program.subList(start,end));
     }
 
     /**
@@ -518,8 +569,9 @@ public class ParseTree implements ExpressionNode, ActionNode {
                     program.add(expression);
                 }
                 ParseTree p = new ParseTree(program);
-                p.interpret();
-                p.infixDisplay();
+                //p.interpret();
+                Machine.execute(p.instructions);
+                //p.infixDisplay();
             }
             catch( IOException ioe ) {
                 System.err.println( "Could not open file " + args[0] );

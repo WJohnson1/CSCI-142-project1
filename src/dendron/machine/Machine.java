@@ -216,11 +216,11 @@ public class Machine {
      * The PRINT instruction
      */
     public static class Print implements Instruction{
+        private int value;
         /**
          * Create a PRINT instruction
          */
         public Print(){
-
         }
         /**
          * Run the microsteps for the PRINT instruction.
@@ -228,7 +228,11 @@ public class Machine {
         @Override
         public void execute() {
             int op2 = stack.pop();
-            System.out.println("*** " + op2);
+            this.value = op2;
+        }
+
+        public int getValue() {
+            return value;
         }
 
         /**
