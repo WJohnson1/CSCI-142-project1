@@ -23,6 +23,7 @@ public class Errors {
     public static final int DENDRON_ABORT = 1;
 
     public enum Type {
+        UNKNOWN_STATEMENT("unknown statement type"),
         DIVIDE_BY_ZERO( "divide by zero" ),
         ILLEGAL_VALUE( "illegal value encountered in source" ),
         UNINITIALIZED( "uninitialized variable in expression" ),

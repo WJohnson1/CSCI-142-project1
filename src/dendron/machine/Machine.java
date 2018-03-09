@@ -81,8 +81,13 @@ public class Machine {
         reset();
         System.out.println("Executing compiled code...");
         for ( Instruction instr: program ) {
-            System.out.println(instr.toString());
             instr.execute();
+            if (instr.toString().equals("PRINT")){
+                Machine.Print p =(Machine.Print) instr;
+                System.out.println("*** "+p.getValue());
+            }
+
+
         }
         System.out.println( "Machine: execution ended with " +
                 stack.size() + " items left on the stack." );
@@ -166,7 +171,6 @@ public class Machine {
          * Run the microsteps for the PUSH instruction.
          */
         public void execute() {
-
             stack.push(getConstant());
         }
 
@@ -220,7 +224,8 @@ public class Machine {
         /**
          * Create a PRINT instruction
          */
-        public Print(){
+        public Print(int value){
+            this.value = value;
         }
         /**
          * Run the microsteps for the PRINT instruction.

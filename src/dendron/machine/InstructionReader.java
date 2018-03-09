@@ -30,7 +30,8 @@ public class InstructionReader {
         put( "DIV", in -> new Machine.Divide() );
         put( "NEG", in -> new Machine.Negate() );
         put( "SQRT", in -> new Machine.SquareRoot() );
-        put( "PRINT", in -> new Machine.Print() );
+        put( "PRINT", in -> {int j = in.nextInt();
+            return new Machine.Print(j);} );
     }};
 
     /**
