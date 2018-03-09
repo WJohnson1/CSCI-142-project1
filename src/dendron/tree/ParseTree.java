@@ -540,6 +540,8 @@ public class ParseTree implements ExpressionNode, ActionNode {
                             System.out.print(" ");
                         }
                     }
+                    System.out.print(" )");
+                    System.out.println();
                 }
                 else{
                     System.out.println("PRINT "+equation.get(i);
